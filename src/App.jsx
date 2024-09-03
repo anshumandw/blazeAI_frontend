@@ -1,29 +1,52 @@
 import './App.css'
 import {User, MessageCircle, X, Heart} from 'lucide-react';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
-const ProfileSelector = () => (
+const saveSwipe = async (profileId) => {
+  const response = await fetch("http://localhost:8080/matches", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ profileId })
+  });
+  if(!response.ok) {
+    throw new Error("Failes to save swipe");
+  }
+}
+
+const fetchRandomProfile = async () => {
+  const response = await fetch("http://localhost:8080/profiles/random");
+  if(!response.ok) {
+    throw new Error("Failes to fetch profile");
+  }
+  return response.json();
+}
+
+const ProfileSelector = ({ profile, onSwipe }) => (
+  profile ? (
   <div className="rounded-lg overflow-hidden bg-white shadow-lg">
     <div className="relative">
-      <img src="http://127.0.0.1:8080/07fb670f-f051-43d2-a0e7-227ae8ba2fa4.jpg" />
+      <img src={"http://127.0.0.1:8081/" + profile.imageUrl} />
       <div className="absolute bottom-0 left-0 right-0 text-white p-4 bg-gradient-to-t from-black">
-        <h2 className="text-3x1 font-bold ">Foo Bar, 30</h2>
+        <h2 className="text-3x1 font-bold ">{profile.firstName} {profile.lastName}, {profile.age}</h2>
       </div>
     </div>
     <div className="p-4">
-        <p className="text-gray-600"> I am a software engineer with 10 years of experience in the industry. I am looking for a new Job.</p>
+        <p className="text-gray-600"> {profile.bio} </p>
       </div>
       <div className='p-4 flex justify-center space-x-4'>
       <button className='bg-red-500 rounded-full p-4 text-white hover:bg-red-700'
-        onClick={() => console.log("left")}>
+        onClick={() => onSwipe(profile.id, "left")}>
         <X size={24} />
       </button>
       <button className='bg-green-500 rounded-full p-4 text-white hover:bg-green-700'
-        onClick={() => console.log("right")}>
+        onClick={() => onSwipe(profile.id, "right")}>
         <Heart size={24} />
       </button>
       </div>
   </div>
+) : <div>Loading....</div>
 );
 
 
@@ -104,12 +127,33 @@ const ChatScreen = () => {
 
 function App() {
 
+  const loadRandomProfile = async () => {
+    try {
+      const profile = await fetchRandomProfile();
+      setCurrentProfile(profile);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    loadRandomProfile();
+  }, {});
+
+  const onSwipe = (profileId, direction) => {
+    if(direction == 'right') {
+      saveSwipe(profileId);
+    }
+    loadRandomProfile();
+  }
+
   const [currentScreen, setCurrentScreen] = useState('profile');
+  const [currentProfile, setCurrentProfile] = useState(null);
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'profile':
-        return <ProfileSelector />;
+        return <ProfileSelector profile={currentProfile} onSwipe={onSwipe}/>;
       case 'matches':
         return <MatchList onSelectMatch={() => setCurrentScreen('chat')} />;
       case 'chat':
