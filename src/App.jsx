@@ -27,16 +27,39 @@ const ProfileSelector = () => (
 );
 
 
+const MatchList = () => (
+  <div className='rounded-lg shadow-lg p-4'>
+    <h2 className='text-2xl font-bold mb-4'> Matches </h2>
+    <ul>
+    {[
+      { id: 1, firstName: 'Foo', lastName: 'Bar', imageUrl: "http://127.0.0.1:8080/191df619-7b22-4a96-a6d8-42c53ab75a44.jpg"},
+      { id: 2, firstName: 'Why', lastName: 'Not', imageUrl: "http://127.0.0.1:8080/0c9655b1-f944-4869-b974-0e1aaf29757e.jpg"}
+    ].map(match => (
+      <li key={match.id} className='mb-2'>
+        <button className='w-full  hover:bg-gray-100 rounded flex item-center'>
+        <img src={match.imageUrl} className="w-16 h-16 rounded-full mr-3 object-cover" />
+        <span>
+          <h3 className='font-bold'> {match.firstName} {match.lastName} </h3>
+        </span>
+        </button>
+      </li>
+    ))
+    }
+    </ul>
+  </div>
+);
+
 function App() {
-  return (<>
+  return (
   <div className="max-w-md mx-auto p-4">
   <nav className="flex justify-between mb-4">
-  <User />
-  <MessageCircle />
+    <User />
+    <MessageCircle />
   </nav>
-  <ProfileSelector />
+    <ProfileSelector />
+    <MatchList />
   </div>
-  </>)
+  )
   
 }
 
